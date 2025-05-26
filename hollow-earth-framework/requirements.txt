@@ -1,0 +1,12 @@
+# Hollow Earth Framework - Minimal Dependencies (Python 3.13 compatible)
+# Core scientific computing - ESSENTIAL ONLY
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.6.0
+
+# Optional but recommended
+pandas>=1.5.0
+
+# Remove these lines if they cause issues:
+# sympy>=1.11.0
+# plotly>=5.0.0
