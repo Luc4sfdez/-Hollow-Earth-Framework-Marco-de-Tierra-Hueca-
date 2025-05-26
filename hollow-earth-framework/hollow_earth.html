@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Hollow Earth Interactive Framework - COMPLETE PHYSICS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #4CAF50, #2196F3, #FF9800);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 2rem;
+            height: 85vh;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .visualization {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metrics {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 0.8rem;
+            color: #4CAF50;
+            font-size: 1.1rem;
+        }
+        
+        .slider-container {
+            margin-bottom: 1rem;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+        }
+        
+        .metric-value.good {
+            color: #4CAF50;
+        }
+        
+        .metric-value.warning {
+            color: #FF9800;
+        }
+        
+        .metric-value.bad {
+            color: #f44336;
+        }
+        
+        .validation-status {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .validation-status.pass {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .validation-status.fail {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            color: #f44336;
+        }
+        
+        #earth3d {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            max-width: 280px;
+            line-height: 1.4;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        
+        .reset-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(45deg, #FF9800, #f44336);
+            border: none;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+        
+        .cross-section-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .cross-section-controls button {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .cross-section-controls button:hover {
+            background: rgba(76, 175, 80, 0.6);
+        }
+        
+        .cross-section-controls button.active {
+            background: #4CAF50;
+        }
+        
+        @media (max-width: 768px) {
+            .control-panel {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌍 Hollow Earth Interactive Framework</h1>
+        <p>COMPLETE VERSION - Real physics with proper cross-section visualization and temperatures</p>
+    </div>
+    
+    <div class="control-panel">
+        <!-- Controls Panel -->
+        <div class="controls">
+            <h2>🎛️ Configuration Controls</h2>
+            
+            <div class="control-group">
+                <h3>🌟 Central Sun</h3>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Radius (km)</span>
+                        <span id="sunRadius">150</span>
+                    </div>
+                    <input type="range" class="slider" id="sunRadiusSlider" 
+                           min="50" max="800" value="150" step="10">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Temperature (K)</span>
+                        <span id="sunTemp">4000</span>
+                    </div>
+                    <input type="range" class="slider" id="sunTempSlider" 
+                           min="2000" max="8000" value="4000" step="100">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Sun Density (10⁶ kg/m³)</span>
+                        <span id="sunDensity">50</span>
+                    </div>
+                    <input type="range" class="slider" id="sunDensitySlider" 
+                           min="1" max="200" value="50" step="1">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🌍 Shell Configuration</h3>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Outer Crust (km)</span>
+                        <span id="outerCrust">100</span>
+                    </div>
+                    <input type="range" class="slider" id="outerCrustSlider" 
+                           min="10" max="500" value="100" step="10">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Dense Core (km)</span>
+                        <span id="denseCore">1800</span>
+                    </div>
+                    <input type="range" class="slider" id="denseCoreSlider" 
+                           min="500" max="3000" value="1800" step="50">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Inner Crust (km)</span>
+                        <span id="innerCrust">200</span>
+                    </div>
+                    <input type="range" class="slider" id="innerCrustSlider" 
+                           min="50" max="800" value="200" step="25">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Core Density (10³ kg/m³)</span>
+                        <span id="coreDensity">8.0</span>
+                    </div>
+                    <input type="range" class="slider" id="coreDensitySlider" 
+                           min="3.0" max="15.0" value="8.0" step="0.1">
+                </div>
+            </div>
+            
+            <button class="reset-btn" onclick="resetDefaults()">
+                🔄 Reset to Defaults
+            </button>
+        </div>
+        
+        <!-- 3D Visualization -->
+        <div class="visualization">
+            <div id="earth3d"></div>
+            <div class="info-panel">
+                <div><strong>🌍 Earth Radius:</strong> 6,371 km</div>
+                <div><strong>🕳️ Cavity Diameter:</strong> <span id="cavityDisplay">0 km</span></div>
+                <div><strong>🌟 Sun Distance:</strong> <span id="sunDistanceDisplay">0 km</span></div>
+                <div><strong>📏 Shell Thickness:</strong> <span id="shellThickness">0 km</span></div>
+                <div><strong>🌡️ Surface Temp:</strong> <span id="surfaceTempDisplay">0°C</span></div>
+                <div><strong>🔥 Interior Temp:</strong> <span id="interiorTempDisplay">0°C</span></div>
+            </div>
+            <div class="cross-section-controls">
+                <div><strong>Cross-Section View:</strong></div>
+                <button onclick="setCrossSection('quarter')" class="active" id="quarterBtn">Quarter Cut</button>
+                <button onclick="setCrossSection('half')" id="halfBtn">Half Cut</button>
+                <button onclick="setCrossSection('slice')" id="sliceBtn">Thin Slice</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #8B4513;"></div>
+                    <span>Outer Crust (2.8 g/cm³)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF4500;"></div>
+                    <span>Dense Core (variable)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #228B22;"></div>
+                    <span>Inner Crust (2.8 g/cm³)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFD700;"></div>
+                    <span>Central Sun (variable)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #001122;"></div>
+                    <span>Hollow Space</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Metrics Panel -->
+        <div class="metrics">
+            <h2>📊 Complete Physics Metrics</h2>
+            
+            <h3 style="color: #4CAF50; margin-top: 0;">⚖️ Gravity Analysis</h3>
+            <div class="metric-item">
+                <span>Surface Gravity:</span>
+                <span class="metric-value" id="surfaceGravity">0.000 m/s²</span>
+            </div>
+            <div class="metric-item">
+                <span>Interior Gravity:</span>
+                <span class="metric-value" id="interiorGravity">0.000 m/s²</span>
+            </div>
+            <div class="metric-item">
+                <span>Gravity Ratio (In/Out):</span>
+                <span class="metric-value" id="gravityRatio">0.000</span>
+            </div>
+            
+            <h3 style="color: #2196F3; margin-top: 1rem;">📏 Mass Distribution</h3>
+            <div class="metric-item">
+                <span>Shell Mass:</span>
+                <span class="metric-value" id="shellMass">0.000×10²⁴ kg</span>
+            </div>
+            <div class="metric-item">
+                <span>Sun Mass:</span>
+                <span class="metric-value" id="sunMass">0.000×10²⁴ kg</span>
+            </div>
+            <div class="metric-item">
+                <span>Total System Mass:</span>
+                <span class="metric-value" id="totalMass">0.000×10²⁴ kg</span>
+            </div>
+            <div class="metric-item">
+                <span>Mass vs Earth:</span>
+                <span class="metric-value" id="massComparison">0.0%</span>
+            </div>
+            
+            <h3 style="color: #FF9800; margin-top: 1rem;">🌡️ Temperature Profile</h3>
+            <div class="metric-item">
+                <span>Sun Core Temp:</span>
+                <span class="metric-value" id="sunCoreTemp">0 K</span>
+            </div>
+            <div class="metric-item">
+                <span>Sun Surface Temp:</span>
+                <span class="metric-value" id="sunSurfaceTemp">0 K</span>
+            </div>
+            <div class="metric-item">
+                <span>Interior Air Temp:</span>
+                <span class="metric-value" id="interiorAirTemp">0°C</span>
+            </div>
+            <div class="metric-item">
+                <span>Inner Surface Temp:</span>
+                <span class="metric-value" id="innerSurfaceTemp">0°C</span>
+            </div>
+            <div class="metric-item">
+                <span>Outer Surface Temp:</span>
+                <span class="metric-value" id="outerSurfaceTemp">0°C</span>
+            </div>
+            
+            <h3 style="color: #9C27B0; margin-top: 1rem;">📊 Volume Analysis</h3>
+            <div class="metric-item">
+                <span>Shell Volume:</span>
+                <span class="metric-value" id="shellVolume">0.000×10²¹ m³</span>
+            </div>
+            <div class="metric-item">
+                <span>Cavity Volume:</span>
+                <span class="metric-value" id="cavityVolume">0.000×10²¹ m³</span>
+            </div>
+            <div class="metric-item">
+                <span>Sun Volume:</span>
+                <span class="metric-value" id="sunVolume">0.000×10²¹ m³</span>
+            </div>
+            <div class="metric-item">
+                <span>Cavity Fill Ratio:</span>
+                <span class="metric-value" id="cavityFillRatio">0.0%</span>
+            </div>
+            
+            <div class="validation-status fail" id="validationStatus">
+                ❌ CALCULATING...
+            </div>
+            
+            <h3 style="margin-top: 1rem; color: #4CAF50;">🎯 Physics Validation</h3>
+            <div id="constraintsList">
+                <!-- Will be populated by calculations -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let scene, camera, renderer;
+        let earthGroup;
+        let crossSectionType = 'quarter';
+        
+        // Physical constants
+        const EARTH_RADIUS = 6371000; // meters
+        const EARTH_MASS = 5.972e24; // kg
+        const G = 6.67430e-11; // gravitational constant
+        const STEFAN_BOLTZMANN = 5.67037e-8; // Stefan-Boltzmann constant
+        const CRUST_DENSITY = 2800; // kg/m³
+        
+        // Initialize the application
+        function init() {
+            init3D();
+            setupEventListeners();
+            updateCalculations();
+        }
+        
+        // Initialize 3D visualization
+        function init3D() {
+            const container = document.getElementById('earth3d');
+            
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 50000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000008, 1);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+            directionalLight.position.set(10000, 10000, 10000);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Create Earth group
+            earthGroup = new THREE.Group();
+            scene.add(earthGroup);
+            
+            // Camera position
+            camera.position.set(15000, 6000, 15000);
+            camera.lookAt(0, 0, 0);
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // Create initial model
+            createEarthModel();
+        }
+        
+        // Set cross-section type
+        function setCrossSection(type) {
+            crossSectionType = type;
+            
+            // Update button states
+            document.querySelectorAll('.cross-section-controls button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(type + 'Btn').classList.add('active');
+            
+            // Recreate model
+            createEarthModel();
+        }
+        
+        // Create 3D Earth cross-section model - REAL CAKE SLICE VIEW
+        function createEarthModel() {
+            // Clear existing model
+            while(earthGroup.children.length > 0) {
+                earthGroup.remove(earthGroup.children[0]);
+            }
+            
+            // Get parameters (convert km to meters for calculations)
+            const outerCrust = parseFloat(document.getElementById('outerCrustSlider').value) * 1000;
+            const denseCore = parseFloat(document.getElementById('denseCoreSlider').value) * 1000;
+            const innerCrust = parseFloat(document.getElementById('innerCrustSlider').value) * 1000;
+            const sunRadius = parseFloat(document.getElementById('sunRadiusSlider').value) * 1000;
+            
+            // Calculate radii (in meters)
+            const r_surface = EARTH_RADIUS;
+            const r_dense_outer = r_surface - outerCrust;
+            const r_dense_inner = r_dense_outer - denseCore;
+            const r_hollow = r_dense_inner - innerCrust;
+            
+            // Cross-section parameters based on type
+            let thetaLength, phiLength;
+            switch(crossSectionType) {
+                case 'quarter':
+                    thetaLength = Math.PI * 0.5; // 90 degrees
+                    phiLength = Math.PI * 0.6;
+                    break;
+                case 'half':
+                    thetaLength = Math.PI; // 180 degrees  
+                    phiLength = Math.PI * 0.6;
+                    break;
+                case 'slice':
+                    thetaLength = Math.PI * 0.15; // 27 degrees - thin slice
+                    phiLength = Math.PI * 0.8;
+                    break;
+            }
+            
+            const thetaStart = 0;
+            const phiStart = 0;
+            
+            // Scale factor for visualization (convert meters to units)
+            const scale = 1/1000;
+            
+            // 1. Outer crust layer
+            if (r_dense_outer < r_surface && outerCrust > 0) {
+                const outerGeometry = new THREE.SphereGeometry(r_surface * scale, 64, 32, thetaStart, thetaLength, phiStart, phiLength);
+                const outerMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x8B4513,
+                    side: THREE.DoubleSide,
+                    transparent: false
+                });
+                const outerMesh = new THREE.Mesh(outerGeometry, outerMaterial);
+                earthGroup.add(outerMesh);
+            }
+            
+            // 2. Dense core layer
+            if (r_dense_inner < r_dense_outer && denseCore > 0) {
+                const denseGeometry = new THREE.SphereGeometry(r_dense_outer * scale, 64, 32, thetaStart, thetaLength, phiStart, phiLength);
+                const denseMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0xFF4500,
+                    side: THREE.DoubleSide,
+                    transparent: false
+                });
+                const denseMesh = new THREE.Mesh(denseGeometry, denseMaterial);
+                earthGroup.add(denseMesh);
+            }
+            
+            // 3. Inner crust layer
+            if (r_hollow < r_dense_inner && innerCrust > 0) {
+                const innerGeometry = new THREE.SphereGeometry(r_dense_inner * scale, 64, 32, thetaStart, thetaLength, phiStart, phiLength);
+                const innerMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x228B22,
+                    side: THREE.DoubleSide,
+                    transparent: false
+                });
+                const innerMesh = new THREE.Mesh(innerGeometry, innerMaterial);
+                earthGroup.add(innerMesh);
+            }
+            
+            // 4. Hollow cavity (wireframe to show space)
+            if (r_hollow > 0) {
+                const cavityGeometry = new THREE.SphereGeometry(r_hollow * scale, 32, 16, thetaStart, thetaLength, phiStart, phiLength);
+                const cavityMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x003366,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const cavityMesh = new THREE.Mesh(cavityGeometry, cavityMaterial);
+                earthGroup.add(cavityMesh);
+            }
+            
+            // 5. Central sun (full sphere, always visible)
+            if (sunRadius > 0 && r_hollow > sunRadius) {
+                const sunGeometry = new THREE.SphereGeometry(sunRadius * scale, 32, 32);
+                const sunMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xFFD700,
+                    emissive: 0xFFAA00,
+                    emissiveIntensity: 0.8
+                });
+                const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+                
+                // Add sun glow effect
+                const glowGeometry = new THREE.SphereGeometry(sunRadius * scale * 1.2, 16, 16);
+                const glowMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xFFDD44,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+                sunMesh.add(glowMesh);
+                
+                earthGroup.add(sunMesh);
+            }
+            
+            // 6. Add measurement lines showing radii
+            const lineMaterial = new THREE.LineBasicMaterial({ 
+                color: 0xFFFFFF, 
+                opacity: 0.8, 
+                transparent: true,
+                linewidth: 2
+            });
+            
+            const radii = [
+                { r: r_surface, color: 0x8B4513, label: 'Surface' },
+                { r: r_dense_outer, color: 0xFF4500, label: 'Dense Outer' },
+                { r: r_dense_inner, color: 0x228B22, label: 'Dense Inner' },
+                { r: r_hollow, color: 0x003366, label: 'Hollow' },
+                { r: sunRadius, color: 0xFFD700, label: 'Sun' }
+            ];
+            
+            radii.forEach((radiusInfo) => {
+                if (radiusInfo.r > 0) {
+                    const points = [
+                        new THREE.Vector3(0, 0, 0),
+                        new THREE.Vector3(radiusInfo.r * scale, 0, 0)
+                    ];
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.Line(geometry, lineMaterial);
+                    earthGroup.add(line);
+                }
+            });
+            
+            // Update info displays
+            updateInfoPanel(r_hollow, sunRadius, outerCrust + denseCore + innerCrust);
+            
+            // Adjust camera for better view
+            const maxRadius = r_surface * scale;
+            camera.position.set(maxRadius * 2.5, maxRadius * 1.0, maxRadius * 2.5);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        // Update info panel
+        function updateInfoPanel(hollowRadius, sunRadius, totalShell) {
+            document.getElementById('cavityDisplay').textContent = `${(hollowRadius * 2 / 1000).toFixed(0)} km`;
+            document.getElementById('sunDistanceDisplay').textContent = `${((hollowRadius - sunRadius) / 1000).toFixed(0)} km`;
+            document.getElementById('shellThickness').textContent = `${(totalShell / 1000).toFixed(0)} km`;
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('sunRadiusSlider').addEventListener('input', updateFromSliders);
+            document.getElementById('sunTempSlider').addEventListener('input', updateFromSliders);
+            document.getElementById('sunDensitySlider').addEventListener('input', updateFromSliders);
+            document.getElementById('outerCrustSlider').addEventListener('input', updateFromSliders);
+            document.getElementById('denseCoreSlider').addEventListener('input', updateFromSliders);
+            document.getElementById('innerCrustSlider').addEventListener('input', updateFromSliders);
+            document.getElementById('coreDensitySlider').addEventListener('input', updateFromSliders);
+            
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        // Update from slider changes
+        function updateFromSliders() {
+            // Update display values with proper units
+            document.getElementById('sunRadius').textContent = document.getElementById('sunRadiusSlider').value;
+            document.getElementById('sunTemp').textContent = document.getElementById('sunTempSlider').value;
+            document.getElementById('sunDensity').textContent = document.getElementById('sunDensitySlider').value;
+            document.getElementById('outerCrust').textContent = document.getElementById('outerCrustSlider').value;
+            document.getElementById('denseCore').textContent = document.getElementById('denseCoreSlider').value;
+            document.getElementById('innerCrust').textContent = document.getElementById('innerCrustSlider').value;
+            document.getElementById('coreDensity').textContent = parseFloat(document.getElementById('coreDensitySlider').value).toFixed(1);
+            
+            // Recreate 3D model and recalculate physics
+            createEarthModel();
+            updateCalculations();
+        }
+        
+        // COMPLETE PHYSICS CALCULATIONS INCLUDING TEMPERATURES
+        function updateCalculations() {
+            // Get parameters in meters
+            const outerCrust = parseFloat(document.getElementById('outerCrustSlider').value) * 1000;
+            const denseCore = parseFloat(document.getElementById('denseCoreSlider').value) * 1000;
+            const innerCrust = parseFloat(document.getElementById('innerCrustSlider').value) * 1000;
+            const coreDensity = parseFloat(document.getElementById('coreDensitySlider').value) * 1000; // Convert to kg/m³
+            const sunRadius = parseFloat(document.getElementById('sunRadiusSlider').value) * 1000;
+            const sunDensity = parseFloat(document.getElementById('sunDensitySlider').value) * 1000000; // Convert to kg/m³
+            const sunTemp = parseFloat(document.getElementById('sunTempSlider').value);
+            
+            // Calculate radii
+            const r_surface = EARTH_RADIUS;
+            const r_dense_outer = r_surface - outerCrust;
+            const r_dense_inner = r_dense_outer - denseCore;
+            const r_hollow = r_dense_inner - innerCrust;
+            
+            // Calculate volumes (4/3 * π * r³)
+            const vol_outer_shell = (4/3) * Math.PI * (Math.pow(r_surface, 3) - Math.pow(r_dense_outer, 3));
+            const vol_dense_shell = (4/3) * Math.PI * (Math.pow(r_dense_outer, 3) - Math.pow(r_dense_inner, 3));
+            const vol_inner_shell = (4/3) * Math.PI * (Math.pow(r_dense_inner, 3) - Math.pow(r_hollow, 3));
+            const vol_cavity = (4/3) * Math.PI * Math.pow(r_hollow, 3);
+            const vol_sun = (4/3) * Math.PI * Math.pow(sunRadius, 3);
+            
+            // Calculate masses
+            const mass_outer = vol_outer_shell * CRUST_DENSITY;
+            const mass_dense = vol_dense_shell * coreDensity;
+            const mass_inner = vol_inner_shell * CRUST_DENSITY;
+            const mass_shell_total = mass_outer + mass_dense + mass_inner;
+            const mass_sun = vol_sun * sunDensity;
+            const mass_total_system = mass_shell_total + mass_sun;
+            
+            // Calculate gravities using Newton's law: g = GM/r²
+            const surface_gravity = (G * mass_shell_total) / Math.pow(r_surface, 2);
+            const interior_gravity = (G * mass_sun) / Math.pow(r_hollow, 2);
+            const gravity_ratio = interior_gravity / surface_gravity;
+            
+            // Mass comparison with Earth
+            const mass_vs_earth = (mass_total_system / EARTH_MASS) * 100;
+            
+            // TEMPERATURE CALCULATIONS
+            // Sun surface temperature (assuming black-body radiation)
+            const sun_surface_temp = sunTemp * 0.7; // Surface is typically cooler than core
+            
+            // Distance from sun to inner surface
+            const distance_to_inner_surface = r_hollow - sunRadius;
+            
+            // Interior air temperature (radiation heating from central sun)
+            // Using inverse square law and Stefan-Boltzmann law
+            const sun_luminosity = 4 * Math.PI * Math.pow(sunRadius, 2) * STEFAN_BOLTZMANN * Math.pow(sun_surface_temp, 4);
+            const flux_at_inner_surface = sun_luminosity / (4 * Math.PI * Math.pow(distance_to_inner_surface, 2));
+            const interior_air_temp = Math.pow(flux_at_inner_surface / STEFAN_BOLTZMANN, 0.25);
+            
+            // Inner surface temperature (similar to air but slightly higher due to surface heating)
+            const inner_surface_temp = interior_air_temp * 1.1;
+            
+            // Outer surface temperature (Earth-like, affected by internal heating)
+            const geothermal_gradient = 25; // K/km
+            const shell_thickness = (outerCrust + denseCore + innerCrust) / 1000; // in km
+            const outer_surface_temp = 288 + (geothermal_gradient * shell_thickness / 100); // Start from 15°C
+            
+            // Update displays
+            document.getElementById('surfaceGravity').textContent = surface_gravity.toFixed(3) + ' m/s²';
+            document.getElementById('interiorGravity').textContent = interior_gravity.toFixed(3) + ' m/s²';
+            document.getElementById('gravityRatio').textContent = gravity_ratio.toFixed(3);
+            document.getElementById('shellMass').textContent = (mass_shell_total / 1e24).toFixed(3) + '×10²⁴ kg';
+            document.getElementById('sunMass').textContent = (mass_sun / 1e24).toFixed(3) + '×10²⁴ kg';
+            document.getElementById('totalMass').textContent = (mass_total_system / 1e24).toFixed(3) + '×10²⁴ kg';
+            document.getElementById('massComparison').textContent = mass_vs_earth.toFixed(1) + '%';
+            document.getElementById('shellVolume').textContent = ((vol_outer_shell + vol_dense_shell + vol_inner_shell) / 1e21).toFixed(3) + '×10²¹ m³';
+            document.getElementById('cavityVolume').textContent = (vol_cavity / 1e21).toFixed(3) + '×10²¹ m³';
+            document.getElementById('sunVolume').textContent = (vol_sun / 1e21).toFixed(3) + '×10²¹ m³';
+            document.getElementById('cavityFillRatio').textContent = ((vol_sun / vol_cavity) * 100).toFixed(1) + '%';
+            
+            // Temperature displays
+            document.getElementById('sunCoreTemp').textContent = sunTemp.toFixed(0) + ' K';
+            document.getElementById('sunSurfaceTemp').textContent = sun_surface_temp.toFixed(0) + ' K';
+            document.getElementById('interiorAirTemp').textContent = (interior_air_temp - 273).toFixed(0) + '°C';
+            document.getElementById('innerSurfaceTemp').textContent = (inner_surface_temp - 273).toFixed(0) + '°C';
+            document.getElementById('outerSurfaceTemp').textContent = (outer_surface_temp - 273).toFixed(0) + '°C';
+            
+            // Update info panel temperatures
+            document.getElementById('surfaceTempDisplay').textContent = (outer_surface_temp - 273).toFixed(0) + '°C';
+            document.getElementById('interiorTempDisplay').textContent = (interior_air_temp - 273).toFixed(0) + '°C';
+            
+            // Update validation
+            updateValidationStatus(surface_gravity, interior_gravity, mass_vs_earth, r_hollow, sunRadius, interior_air_temp, outer_surface_temp);
+        }
+        
+        // Update validation status
+        function updateValidationStatus(surfaceG, interiorG, massPercent, hollowRadius, sunRadius, interiorTemp, surfaceTemp) {
+            const constraints = {
+                surfaceGravity: surfaceG >= 8.0 && surfaceG <= 12.0,
+                interiorGravity: interiorG >= 1.0 && interiorG <= 15.0,
+                massReasonable: massPercent >= 50 && massPercent <= 200,
+                sunFitsInCavity: hollowRadius > sunRadius * 1.1,
+                physicallyPossible: hollowRadius > 0 && sunRadius > 0,
+                temperatureReasonable: interiorTemp >= 200 && interiorTemp <= 400 && surfaceTemp >= 250 && surfaceTemp <= 320
+            };
+            
+            const allPass = Object.values(constraints).every(c => c);
+            
+            const statusEl = document.getElementById('validationStatus');
+            if (allPass) {
+                statusEl.className = 'validation-status pass';
+                statusEl.textContent = '✅ PHYSICALLY PLAUSIBLE CONFIGURATION';
+            } else {
+                statusEl.className = 'validation-status fail';
+                statusEl.textContent = '❌ PHYSICS VIOLATIONS DETECTED';
+            }
+            
+            // Color coding for metrics
+            document.getElementById('surfaceGravity').className = `metric-value ${constraints.surfaceGravity ? 'good' : 'bad'}`;
+            document.getElementById('interiorGravity').className = `metric-value ${constraints.interiorGravity ? 'good' : 'bad'}`;
+            document.getElementById('massComparison').className = `metric-value ${constraints.massReasonable ? 'good' : 'bad'}`;
+            document.getElementById('interiorAirTemp').className = `metric-value ${constraints.temperatureReasonable ? 'good' : 'warning'}`;
+            
+            // Update detailed validation
+            document.getElementById('constraintsList').innerHTML = `
+                <div class="metric-item">
+                    <span>Surface Gravity (8-12 m/s²):</span>
+                    <span class="metric-value ${constraints.surfaceGravity ? 'good' : 'bad'}">
+                        ${constraints.surfaceGravity ? '✅ OK' : '❌ FAIL'}
+                    </span>
+                </div>
+                <div class="metric-item">
+                    <span>Interior Gravity (1-15 m/s²):</span>
+                    <span class="metric-value ${constraints.interiorGravity ? 'good' : 'bad'}">
+                        ${constraints.interiorGravity ? '✅ OK' : '❌ EXTREME'}
+                    </span>
+                </div>
+                <div class="metric-item">
+                    <span>Mass vs Earth (50-200%):</span>
+                    <span class="metric-value ${constraints.massReasonable ? 'good' : 'bad'}">
+                        ${constraints.massReasonable ? '✅ OK' : '❌ UNREALISTIC'}
+                    </span>
+                </div>
+                <div class="metric-item">
+                    <span>Sun Fits in Cavity:</span>
+                    <span class="metric-value ${constraints.sunFitsInCavity ? 'good' : 'bad'}">
+                        ${constraints.sunFitsInCavity ? '✅ FITS' : '❌ TOO BIG'}
+                    </span>
+                </div>
+                <div class="metric-item">
+                    <span>Temperature Range:</span>
+                    <span class="metric-value ${constraints.temperatureReasonable ? 'good' : 'warning'}">
+                        ${constraints.temperatureReasonable ? '✅ HABITABLE' : '⚠️ EXTREME'}
+                    </span>
+                </div>
+                <div class="metric-item">
+                    <span>Geometry Valid:</span>
+                    <span class="metric-value ${constraints.physicallyPossible ? 'good' : 'bad'}">
+                        ${constraints.physicallyPossible ? '✅ VALID' : '❌ IMPOSSIBLE'}
+                    </span>
+                </div>
+            `;
+        }
+        
+        // Reset to defaults
+        function resetDefaults() {
+            document.getElementById('sunRadiusSlider').value = 150;
+            document.getElementById('sunTempSlider').value = 4000;
+            document.getElementById('sunDensitySlider').value = 50;
+            document.getElementById('outerCrustSlider').value = 100;
+            document.getElementById('denseCoreSlider').value = 1800;
+            document.getElementById('innerCrustSlider').value = 200;
+            document.getElementById('coreDensitySlider').value = 8.0;
+            
+            updateFromSliders();
+        }
+        
+        // Window resize handler
+        function onWindowResize() {
+            const container = document.getElementById('earth3d');
+            if (container && renderer) {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
